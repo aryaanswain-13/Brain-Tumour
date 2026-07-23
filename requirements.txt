@@ -1,0 +1,10 @@
+numpy
+scipy
+nibabel
+monai
+timm
+scikit-learn
+statsmodels
+matplotlib
+tqdm
+pypdf

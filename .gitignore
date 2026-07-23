@@ -1,0 +1,23 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# OS files
+.DS_Store
+
+# Environments
+.venv/
+env/
+venv/
+
+# Project specific directories & files
+feature_cache/
+feature_cache_slim_ucsf/
+UCSF-PDGM-v5/
+UCSF-PDGM-metadata_v5.csv
+checkpoints/
+*.pt
+*.pth
+*.zip
+*.csv
