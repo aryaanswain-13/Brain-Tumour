@@ -1,0 +1,146 @@
+BRAIN TUMOR SEGMENTATION & MOLECULAR MARKER CLASSIFICATION
+============================================================
+
+RESULTS SUMMARY
+===============
+
+Model: SwinUNETR-based multimodal 3D MRI pipeline
+Primary Dataset: UCSF-PDGM
+Primary Test Set: n = 72
+Classification Evaluation: 5-seed evaluation
+External Validation: BraTS 2023 GLI, UTSW Glioma, UPENN-GBM
+
+
+1. SEGMENTATION PERFORMANCE
+============================
+
+UCSF-PDGM Test Set (n = 72)
+
+Region                  Dice              IoU               HD95 (mm)        Precision         Recall
+-------------------------------------------------------------------------------------------------------
+Whole Tumor (WT)        0.859 ± 0.183     0.783 ± 0.196     9.0 ± 13.5       0.882 ± 0.164     0.861 ± 0.216
+Tumor Core (TC)         0.758 ± 0.348     0.707 ± 0.345     6.3 ± 10.6       0.792 ± 0.339     0.779 ± 0.349
+Enhancing Tumor (ET)    0.727 ± 0.335     0.654 ± 0.317     5.7 ± 10.2       0.725 ± 0.331     0.741 ± 0.352
+
+
+2. MOLECULAR MARKER CLASSIFICATION
+===================================
+
+UCSF-PDGM Test Set (n = 72, 5-seed mean ± standard deviation)
+
+Task                    AUC               Accuracy          F1                Sensitivity        Specificity
+---------------------------------------------------------------------------------------------------------------
+IDH Status               0.917 ± 0.006     0.889 ± 0.000     0.714 ± 0.000     0.714 ± 0.000      0.931 ± 0.000
+WHO Grade                0.976 ± 0.001     0.922 ± 0.012     0.952 ± 0.008     0.936 ± 0.008      0.862 ± 0.034
+
+
+3. PER-SEED CLASSIFICATION RESULTS
+===================================
+
+Test Set AUC Values
+
+Seed                    IDH AUC           WHO Grade AUC
+---------------------------------------------------------
+0                       0.921             0.975
+1                       0.917             0.975
+2                       0.925             0.978
+3                       0.910             0.975
+4                       0.911             0.975
+
+Mean ± Std              0.917 ± 0.006     0.976 ± 0.001
+Range                   0.910–0.925       0.975–0.978
+
+
+4. STATISTICAL COMPARISON: McNEMAR'S EXACT TEST
+================================================
+
+A. UCSF-PDGM Test Set (n = 72, Seed 1)
+
+Task                    Baseline Acc.      Model Acc.       b       c       p-value       Interpretation
+------------------------------------------------------------------------------------------------------------
+IDH Status              0.806              0.889            10      4       0.1796        Not significant
+WHO Grade               0.819              0.917            11      4       0.1185        Not significant
+
+
+B. UCSF-PDGM Training Set (n = 343, Seed 1)
+
+Task                    Baseline Acc.      Model Acc.       b       c       p-value       Interpretation
+------------------------------------------------------------------------------------------------------------
+IDH Status              0.802              0.880            54      27      0.0036        Significant
+WHO Grade               0.808              0.913            62      26      0.0002        Highly significant
+
+
+5. ABLATION STUDY
+=================
+
+Dataset: UCSF-PDGM validation set
+Objective: Compare different gate/fusion configurations.
+
+Mode    Description                                      Best Val Loss    Epochs Run    Early Stop
+--------------------------------------------------------------------------------------------------
+A       Encoder only (no fusion)                         1.4053           29            Yes (epoch 29)
+B       Fixed gate G = 0.5                               0.7888           30            Yes (epoch 30)
+C       Confidence-only gate                             1.0244           42            Yes (epoch 42)
+D       Proposed: G = conf × sigmoid(morph_gate)         0.7511           60            No (full run)
+
+
+6. ZERO-SHOT CROSS-DATASET SEGMENTATION
+========================================
+
+The trained pipeline was evaluated on independent datasets without
+retraining on the target dataset.
+
+Dataset                  n        WT Dice       TC Dice       ET Dice
+----------------------------------------------------------------------
+UCSF-PDGM (test)         72       0.859         0.758         0.727
+BraTS 2023 GLI           1,251    0.786         0.758         0.743
+UTSW Glioma              362      0.616         -             -
+
+
+7. ZERO-SHOT CROSS-DATASET CLASSIFICATION
+==========================================
+
+Dataset                  n        IDH AUC       Grade AUC
+----------------------------------------------------------
+UCSF-PDGM (test)         72       0.917         0.976
+UTSW Glioma              362      0.691         0.715
+UPENN-GBM                -        0.503         -
+
+
+8. KEY FINDINGS
+===============
+
+1. The segmentation model achieved its strongest performance on
+   Whole Tumor segmentation, with a Dice score of 0.859 on the
+   UCSF-PDGM test set.
+
+2. Tumor Core and Enhancing Tumor segmentation achieved Dice scores
+   of 0.758 and 0.727 respectively.
+
+3. Molecular marker classification achieved strong test-set
+   discrimination for IDH Status (AUC = 0.917) and WHO Grade
+   (AUC = 0.976).
+
+4. Classification performance was stable across the five random
+   seeds, with IDH AUC ranging from 0.910 to 0.925 and WHO Grade
+   AUC ranging from 0.975 to 0.978.
+
+5. The proposed confidence-morphology gate achieved the lowest
+   validation loss among the evaluated gate configurations
+   (0.7511), outperforming the encoder-only, fixed-gate, and
+   confidence-only variants.
+
+6. The model demonstrated cross-dataset generalization, retaining
+   meaningful segmentation performance on BraTS 2023 GLI and UTSW
+   Glioma without retraining.
+
+7. Classification performance decreased on external datasets,
+   particularly for UPENN-GBM IDH classification (AUC = 0.503),
+   highlighting the effect of cross-dataset distribution shift.
+
+8. McNemar's exact test showed that the model's higher accuracy
+   relative to the baseline was not statistically significant on
+   the UCSF-PDGM test set for either IDH Status or WHO Grade.
+
+9. On the training set, the corresponding McNemar tests were
+   statistically significant for both IDH Status and WHO Grade.
